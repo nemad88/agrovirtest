@@ -184,7 +184,7 @@ app.post('/partners', function (req, res) {
         return;
       }
       res.status(201).json({
-        partner_id: this.lastID,
+        partnerId: this.lastID,
       });
     }
   );
