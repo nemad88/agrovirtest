@@ -7,8 +7,15 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import CustomTable from '../components/CustomTable';
-import { fetchCities, fetchCompanyForms, fetchPartners } from './homeSlice';
+import {
+  fetchCities,
+  fetchCompanyForms,
+  fetchPartners,
+  selectPartners,
+} from './homeSlice';
 import TextField from '@material-ui/core/TextField';
+import { filterPartners } from './utils';
+import XLSX from 'xlsx';
 
 const filterDefault = {
   name: '',
@@ -42,13 +49,15 @@ const useStyles = makeStyles((theme) => ({
 
 const Home = () => {
   const classes = useStyles();
-  const dispatch = useDispatch();
   const [filter, setFilter] = useState(filterDefault);
+  const dispatch = useDispatch();
+  const partners = useSelector(selectPartners);
+
   useEffect(() => {
     dispatch(fetchPartners());
     dispatch(fetchCities());
     dispatch(fetchCompanyForms());
-  }, []);
+  }, [dispatch]);
 
   const handleInputChange = (e) => {
     const propertyName = e.target.name;
@@ -56,6 +65,14 @@ const Home = () => {
     setFilter((partner) => {
       return { ...partner, [propertyName]: newValue };
     });
+  };
+
+  const exportToXls = () => {
+    const toExport = filterPartners(partners, filter);
+    let binaryWS = XLSX.utils.json_to_sheet(toExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, binaryWS, 'Partners');
+    XLSX.writeFile(wb, 'Partners.xlsx');
   };
 
   return (
@@ -113,7 +130,11 @@ const Home = () => {
                     </Grid>
 
                     <Grid item xs={12} sm={6}>
-                      <Button variant="contained" color="primary">
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={exportToXls}
+                      >
                         Export to excel
                       </Button>
                     </Grid>

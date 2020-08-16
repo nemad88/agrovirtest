@@ -7,14 +7,13 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';
 import {
-  selectEditablePartner,
   selectCompanyForms,
   selectCities,
-  resetEditablePartner,
   savePartner,
 } from '../features/homeSlice';
 
@@ -35,9 +34,9 @@ const CustomDialog = ({ open, handleClose, partnerToSave }) => {
   const classes = useStyles();
   const cities = useSelector(selectCities);
   const companyForms = useSelector(selectCompanyForms);
-  const partnerToEdit = useSelector(selectEditablePartner);
   const [editedPartner, setEditedPartner] = useState({});
   const dispatch = useDispatch();
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     setEditedPartner(partnerToSave);
@@ -63,13 +62,17 @@ const CustomDialog = ({ open, handleClose, partnerToSave }) => {
   };
 
   const handleSave = async () => {
-    console.log('to SAVE:', {
-      ...editedPartner,
-      ...cityIsNew(),
-      ...companyFormIsNew(),
-      cityIsNew: !Boolean(cityIsNew()),
-      companyFormIsNew: !Boolean(companyFormIsNew()),
-    });
+    console.log(editedPartner);
+    if (
+      editedPartner.name.length === 0 ||
+      editedPartner.cityName.length === 0
+    ) {
+      setErrorMessage('Name and city are required');
+      return null;
+    }
+
+    setErrorMessage('');
+
     dispatch(
       savePartner({
         ...editedPartner,
@@ -92,7 +95,10 @@ const CustomDialog = ({ open, handleClose, partnerToSave }) => {
         <IconButton
           aria-label="close"
           className={classes.closeButton}
-          onClick={handleClose}
+          onClick={() => {
+            handleClose();
+            setErrorMessage('');
+          }}
         >
           <CloseIcon />
         </IconButton>
@@ -203,9 +209,19 @@ const CustomDialog = ({ open, handleClose, partnerToSave }) => {
               />
             </Grid>
           </Grid>
+          <Typography variant="h6" color="error">
+            {errorMessage}
+          </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button
+            onClick={() => {
+              handleClose();
+              setErrorMessage('');
+            }}
+          >
+            Cancel
+          </Button>
           <Button
             type="submit"
             variant="contained"

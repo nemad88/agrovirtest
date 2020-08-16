@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -48,6 +47,11 @@ const CustomTable = ({ filter }) => {
     setOpen(false);
   };
 
+  const handleEdit = (row) => {
+    setOpen(true);
+    setPartnerToSave({ ...row, partnerIsNew: false });
+  };
+
   return (
     <React.Fragment>
       <Table size="small">
@@ -77,7 +81,7 @@ const CustomTable = ({ filter }) => {
                 .toLowerCase()
                 .includes(filter.cityName.toLowerCase())
             ) {
-              return;
+              return null;
             }
 
             return (
@@ -101,12 +105,7 @@ const CustomTable = ({ filter }) => {
                   </IconButton>
                 </TableCell>
                 <TableCell align="center">
-                  <IconButton
-                    onClick={() => {
-                      setOpen(true);
-                      setPartnerToSave({ ...row, partnerIsNew: false });
-                    }}
-                  >
+                  <IconButton onClick={() => handleEdit(row)}>
                     <EditIcon />
                   </IconButton>
                 </TableCell>

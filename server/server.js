@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3');
 const express = require('express');
 
-var app = express();
+const app = express();
 
 const HTTP_PORT = 8000;
 app.listen(HTTP_PORT, () => {
@@ -19,14 +19,14 @@ const db = new sqlite3.Database(':memory:', (err) => {
       `CREATE TABLE partners( \
             partnerId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
             name NVARCHAR(20) NOT NULL,\
-            companyFormId INTEGER NOT NULL,\
-            taxNumber NVARCHAR(20) NOT NULL,\
-            companyNumber NVARCHAR(100) NOT NULL,\
+            companyFormId INTEGER ,\
+            taxNumber NVARCHAR(20) ,\
+            companyNumber NVARCHAR(100) ,\
             cityId INTEGER NOT NULL,\
-            address NVARCHAR(100) NOT NULL,\
-            phone NVARCHAR(100) NOT NULL,\
-            bankAccount NVARCHAR(100) NOT NULL,\
-            comment NVARCHAR(100) NOT NULL\            
+            address NVARCHAR(100) ,\
+            phone NVARCHAR(100) ,\ 
+            bankAccount NVARCHAR(100) ,\
+            comment NVARCHAR(100) \            
         )`,
       (err) => {
         if (err) {
@@ -38,47 +38,47 @@ const db = new sqlite3.Database(':memory:', (err) => {
                           VALUES (?,?,?,?,?,?,?,?,?)`;
 
         db.run(insert, [
-          'Berenyi',
+          'Big',
           1,
           '123456789',
           'ABC123456',
           1,
-          'Best street 22',
-          '+36251234567',
+          'John street 202',
+          '+362541234567',
           '123456-789456-123456',
           'This is a comment',
         ]);
         db.run(insert, [
-          'Valamilyen',
+          'Little',
           2,
           '100000000',
-          'CD123456',
-          1,
+          'AFDECDE',
+          4,
           'Free road 4',
+          '+22222',
+          '1234-1444-99999',
+          'This is a comment',
+        ]);
+        db.run(insert, [
+          'Smith',
+          3,
+          '100000000',
+          'CD123456',
+          3,
+          'Long road 4',
           '+12457955',
           '55555-1444-8888',
           'This is a comment',
         ]);
         db.run(insert, [
-          'Valamilyen',
+          'True',
           2,
           '100000000',
           'CD123456',
           1,
-          'Free road 4',
+          'Baker street 4',
           '+12457955',
-          '55555-1444-8888',
-          'This is a comment',
-        ]);
-        db.run(insert, [
-          'Valamilyen',
-          2,
-          '100000000',
-          'CD123456',
-          1,
-          'Free road 4',
-          '+12457955',
-          '55555-1444-8888',
+          '1444-8888-44444',
           'This is a comment',
         ]);
       }
@@ -95,9 +95,11 @@ const db = new sqlite3.Database(':memory:', (err) => {
           return;
         }
         let insert = 'INSERT INTO company_form (companyFormName) VALUES (?)';
-        db.run(insert, ['Kft']);
-        db.run(insert, ['Bt']);
-        db.run(insert, ['Rt']);
+        db.run(insert, ['Partnership']);
+        db.run(insert, ['LLC']);
+        db.run(insert, ['Non-Profit']);
+        db.run(insert, ['Co-op']);
+        db.run(insert, ['Corporation']);
       }
     );
 
@@ -112,12 +114,12 @@ const db = new sqlite3.Database(':memory:', (err) => {
           return;
         }
         let insert = 'INSERT INTO cities (cityName) VALUES (?)';
-        db.run(insert, ['Budapest']);
-        db.run(insert, ['Debrecen']);
-        db.run(insert, ['Pecs']);
-        db.run(insert, ['Miskolc']);
-        db.run(insert, ['Siofok']);
-        db.run(insert, ['Szeged']);
+        db.run(insert, ['New York']);
+        db.run(insert, ['Washington']);
+        db.run(insert, ['Texas city']);
+        db.run(insert, ['Sidney']);
+        db.run(insert, ['London']);
+        db.run(insert, ['Manchester']);
       }
     );
   }
@@ -271,7 +273,7 @@ app.post('/cities', function (req, res) {
         return;
       }
       res.status(201).json({
-        city_id: this.lastID,
+        cityId: this.lastID,
       });
     }
   );
@@ -317,7 +319,7 @@ app.post('/company-form', function (req, res) {
         return;
       }
       res.status(201).json({
-        company_form_id: this.lastID,
+        companyFormId: this.lastID,
       });
     }
   );
