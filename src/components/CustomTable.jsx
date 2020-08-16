@@ -1,68 +1,136 @@
-import React from 'react';
-import Link from '@material-ui/core/Link';
-import {makeStyles} from '@material-ui/core/styles';
+import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import { selectPartners, deletePartner } from '../features/homeSlice';
 
-// Generate Order Data
-function createData(id, date, name, shipTo, paymentMethod, amount) {
-    return {id, date, name, shipTo, paymentMethod, amount};
-}
+import CustomDialog from './CustomDialog';
 
-const rows = [
-    createData(0, '16 Mar, 2019', 'Elvis Presley', 'Tupelo, MS', 'VISA ⠀•••• 3719', 312.44),
-    createData(1, '16 Mar, 2019', 'Paul McCartney', 'London, UK', 'VISA ⠀•••• 2574', 866.99),
-    createData(2, '16 Mar, 2019', 'Tom Scholz', 'Boston, MA', 'MC ⠀•••• 1253', 100.81),
-    createData(3, '16 Mar, 2019', 'Michael Jackson', 'Gary, IN', 'AMEX ⠀•••• 2000', 654.39),
-    createData(4, '15 Mar, 2019', 'Bruce Springsteen', 'Long Branch, NJ', 'VISA ⠀•••• 5919', 212.79),
-];
-
-function preventDefault(event) {
-    event.preventDefault();
-}
+const newEmptyPartner = {
+  address: '',
+  bankAccount: '',
+  cityId: '',
+  cityName: '',
+  comment: '',
+  companyFormId: '',
+  companyFormName: '',
+  companyNumber: '',
+  name: '',
+  partnerId: '',
+  phone: '',
+  taxNumber: '',
+  partnerIsNew: true,
+};
 
 const useStyles = makeStyles((theme) => ({
-    seeMore: {
-        marginTop: theme.spacing(3),
-    },
+  seeMore: {
+    marginTop: theme.spacing(3),
+  },
 }));
 
-const CustomTable = () => {
-    const classes = useStyles();
-    return (
-        <React.Fragment>
-            <Table size="small">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Date</TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Ship To</TableCell>
-                        <TableCell>Payment Method</TableCell>
-                        <TableCell align="right">Sale Amount</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {rows.map((row) => (
-                        <TableRow key={row.id}>
-                            <TableCell>{row.date}</TableCell>
-                            <TableCell>{row.name}</TableCell>
-                            <TableCell>{row.shipTo}</TableCell>
-                            <TableCell>{row.paymentMethod}</TableCell>
-                            <TableCell align="right">{row.amount}</TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-            <div className={classes.seeMore}>
-                <Link color="primary" href="#" onClick={preventDefault}>
-                    See more orders
-                </Link>
-            </div>
-        </React.Fragment>
-    );
-}
+const CustomTable = ({ filter }) => {
+  const classes = useStyles();
+  const dispatch = useDispatch();
+  const partners = useSelector(selectPartners);
+  const [open, setOpen] = useState(false);
+  const [partnerToSave, setPartnerToSave] = useState(newEmptyPartner);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleEdit = (row) => {
+    setOpen(true);
+    setPartnerToSave({ ...row, partnerIsNew: false });
+  };
+
+  return (
+    <React.Fragment>
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Form</TableCell>
+            <TableCell>Tax number</TableCell>
+            <TableCell>Company number</TableCell>
+            <TableCell>City</TableCell>
+            <TableCell>Address</TableCell>
+            <TableCell>Phone</TableCell>
+            <TableCell>Bank account</TableCell>
+            <TableCell>Comment</TableCell>
+            <TableCell align="center">Delete</TableCell>
+            <TableCell align="center">Edit</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {partners.map((row) => {
+            if (
+              !row.name.toLowerCase().includes(filter.name.toLowerCase()) ||
+              !row.companyFormName
+                .toLowerCase()
+                .includes(filter.companyFormName.toLowerCase()) ||
+              !row.cityName
+                .toLowerCase()
+                .includes(filter.cityName.toLowerCase())
+            ) {
+              return null;
+            }
+
+            return (
+              <TableRow key={row.partnerId}>
+                <TableCell>{row.name}</TableCell>
+                <TableCell>{row.companyFormName}</TableCell>
+                <TableCell>{row.taxNumber}</TableCell>
+                <TableCell>{row.companyNumber}</TableCell>
+                <TableCell>{row.cityName}</TableCell>
+                <TableCell>{row.address}</TableCell>
+                <TableCell>{row.phone}</TableCell>
+                <TableCell>{row.bankAccount}</TableCell>
+                <TableCell>{row.comment}</TableCell>
+                <TableCell align="center">
+                  <IconButton
+                    onClick={() => {
+                      dispatch(deletePartner(row.partnerId));
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+                <TableCell align="center">
+                  <IconButton onClick={() => handleEdit(row)}>
+                    <EditIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+      <div className={classes.seeMore}>
+        <Button
+          onClick={() => {
+            setPartnerToSave({ ...newEmptyPartner });
+            setOpen(true);
+          }}
+        >
+          New partner
+        </Button>
+      </div>
+      <CustomDialog
+        open={open}
+        handleClose={handleClose}
+        partnerToSave={partnerToSave}
+      />
+    </React.Fragment>
+  );
+};
 
 export default CustomTable;
